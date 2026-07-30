@@ -1,5 +1,7 @@
 /**
- * SplitSathi - State Management & Persistent Storage
+ * =========================================================
+ * SplitSathi — State Management & Persistent LocalStorage
+ * =========================================================
  */
 
 const STORAGE_KEY = 'splitsathi_app_v2';
