@@ -1,5 +1,7 @@
 /**
- * SplitSathi - UI Renderer & Fintech DOM Controller
+ * =========================================================
+ * SplitSathi — UI Renderer & Fintech DOM Controller
+ * =========================================================
  */
 
 import { store } from './state.js';
