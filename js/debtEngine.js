@@ -1,5 +1,8 @@
 /**
- * Debt Engine - Net Balances & Minimum Cash Flow Algorithm
+ * =========================================================
+ * SplitSathi — Debt Simplification Engine
+ * Minimum Cash Flow Algorithm (Greedy Graph Simplification)
+ * =========================================================
  */
 
 /**
