@@ -1,439 +1,493 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SplitSathi — Split bills, not friendships</title>
-  <meta name="description" content="Simple, Award-winning Indian Fintech App for Group Bill Splitting & Debt Simplification.">
+  <meta name="description" content="Premium Fintech App for Group Bill Splitting & Debt Simplification. Inspired by CRED and Google Pay.">
   
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <!-- Canvas Confetti CDN -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-  <!-- Navigation Bar -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="#" class="brand-logo">
-        <div class="brand-icon-box">⚡</div>
-        <div class="brand-text-box">
-          <h1>SplitSathi</h1>
-          <p>Split bills, not friendships.</p>
-        </div>
-      </a>
+  <div class="app-container">
 
-      <!-- Navigation Tabs -->
-      <div class="nav-links">
-        <button class="nav-item active" data-nav="dashboard">📊 Dashboard</button>
-        <button class="nav-item" data-nav="settlements">⚡ Settle Up (Debts)</button>
-        <button class="nav-item" data-nav="expenses">💸 Expenses</button>
-        <button class="nav-item" data-nav="members">👥 Members</button>
-        <button class="nav-item" data-nav="analytics">📈 Analytics</button>
+    <!-- =========================================================
+         LEFT SIDEBAR
+         ========================================================= -->
+    <aside class="left-sidebar">
+      <div>
+        <div class="brand-container">
+          <div class="brand-icon">⚡</div>
+          <div class="brand-text">
+            <h1>SplitSathi</h1>
+            <p>Split bills, not friendships.</p>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <button class="nav-link active" data-tab="dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+          </button>
+          <button class="nav-link" data-tab="groups">
+            <i data-lucide="users"></i>
+            <span>Groups</span>
+          </button>
+          <button class="nav-link" data-tab="expenses">
+            <i data-lucide="receipt"></i>
+            <span>Expenses</span>
+          </button>
+          <button class="nav-link" data-tab="settlements">
+            <i data-lucide="arrow-right-left"></i>
+            <span>Settlements</span>
+          </button>
+          <button class="nav-link" data-tab="analytics">
+            <i data-lucide="pie-chart"></i>
+            <span>Analytics</span>
+          </button>
+          <button class="nav-link" data-tab="history">
+            <i data-lucide="history"></i>
+            <span>History</span>
+          </button>
+          <button class="nav-link" data-tab="settings">
+            <i data-lucide="settings"></i>
+            <span>Settings</span>
+          </button>
+        </nav>
       </div>
 
-      <!-- Right Header Controls -->
-      <div class="nav-right">
-        <select id="groupSelect" class="select-control" title="Active Group"></select>
+      <div class="sidebar-footer">
+        <div class="user-profile-badge" id="userProfileTrigger">
+          <div class="avatar">R</div>
+          <div class="user-info">
+            <h4>Raza Mohammed</h4>
+            <p>raza@splitsathi.app</p>
+          </div>
+        </div>
+        <button class="nav-link" id="btnLogout" style="color: var(--error);">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
 
-        <button id="btnHeaderAddExpense" class="btn btn-primary btn-sm btn-open-add-expense">+ Add Expense</button>
-        <button id="btnOpenDemoModal" class="btn btn-glass btn-sm">✨ Presets</button>
-        <button id="btnToggleTheme" class="btn-icon-btn" title="Toggle Dark/Light Mode">🌙</button>
-        <button id="btnOpenExportModal" class="btn-icon-btn" title="Backup / Restore">💾</button>
+    <!-- =========================================================
+         MAIN CONTENT AREA
+         ========================================================= -->
+    <main class="main-content">
 
-        <div class="user-avatar-badge">
-          <div class="avatar" style="background: #7C3AED; width: 30px; height: 30px; font-size: 0.75rem;">R</div>
-          <span style="font-size: 0.85rem; font-weight: 600;">Rza Mohammed</span>
+      <!-- TOP HEADER -->
+      <header class="top-header">
+        <div class="search-box">
+          <i data-lucide="search"></i>
+          <input type="text" id="searchInput" placeholder="Search expenses, friends, or groups...">
+        </div>
+
+        <div class="top-header-right">
+          <select id="groupSelectDropdown" class="group-select-dropdown" title="Select Active Group">
+            <!-- Populated via JS -->
+          </select>
+
+          <button class="icon-btn" id="btnToggleTheme" title="Toggle Light/Dark Theme">
+            <i data-lucide="moon" id="themeIcon"></i>
+          </button>
+
+          <button class="icon-btn" id="btnNotifications" title="Notifications">
+            <i data-lucide="bell"></i>
+            <span class="notification-badge"></span>
+          </button>
+
+          <div class="avatar" style="width: 40px; height: 40px; font-size: 14px; cursor: pointer;">R</div>
+        </div>
+      </header>
+
+      <!-- TAB VIEW: DASHBOARD -->
+      <div class="tab-view active" id="view-dashboard">
+
+        <!-- GROUP HEADER HERO CARD -->
+        <section class="group-header-card">
+          <div class="group-info">
+            <h2 id="heroGroupName">
+              Weekend Goa Trip 🌴
+              <span class="status-badge"><span class="dot"></span> Active</span>
+            </h2>
+            <div class="group-meta">
+              <span class="group-meta-item"><i data-lucide="users" style="width:14px;"></i> <strong id="heroMemberCount">5</strong> Members</span>
+              <span>•</span>
+              <span class="group-meta-item"><i data-lucide="calendar" style="width:14px;"></i> Created <span id="heroCreatedDate">15 July</span></span>
+            </div>
+          </div>
+
+          <div class="group-actions">
+            <button class="btn btn-primary btn-open-add-expense">
+              <i data-lucide="plus-circle"></i> Add Expense
+            </button>
+            <button class="btn btn-secondary" id="btnHeroSettleUp">
+              <i data-lucide="zap"></i> Settle Up
+            </button>
+            <button class="btn btn-outline" id="btnInviteFriends">
+              <i data-lucide="user-plus"></i> Invite
+            </button>
+          </div>
+        </section>
+
+        <!-- 4 HORIZONTAL SUMMARY CARDS -->
+        <section class="summary-cards-grid">
+          <div class="summary-card">
+            <div class="summary-card-header">
+              <span class="summary-card-title">Total Expenses</span>
+              <div class="summary-card-icon green">💳</div>
+            </div>
+            <div class="summary-card-amount" id="statTotalExpense">₹18,760</div>
+            <div class="summary-card-subtitle">Total group spending</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-card-header">
+              <span class="summary-card-title">You Paid</span>
+              <div class="summary-card-icon blue">📤</div>
+            </div>
+            <div class="summary-card-amount" id="statYouPaid">₹6,420</div>
+            <div class="summary-card-subtitle">Your total contribution</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-card-header">
+              <span class="summary-card-title">You Owe</span>
+              <div class="summary-card-icon red">🔻</div>
+            </div>
+            <div class="summary-card-amount" id="statYouOwe" style="color: var(--error);">₹1,320</div>
+            <div class="summary-card-subtitle">To be paid to friends</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-card-header">
+              <span class="summary-card-title">You'll Receive</span>
+              <div class="summary-card-icon yellow">🟢</div>
+            </div>
+            <div class="summary-card-amount" id="statYouReceive" style="color: var(--primary-green);">₹2,840</div>
+            <div class="summary-card-subtitle">From group members</div>
+          </div>
+        </section>
+
+        <div class="dashboard-sections-grid">
+
+          <!-- AI INSIGHTS CARD -->
+          <section class="ai-insight-card">
+            <div class="ai-insight-header">
+              <i data-lucide="sparkles"></i> AI Smart Insights
+            </div>
+            <ul class="ai-insight-list">
+              <li>✨ Food spending increased 12% compared to last weekend.</li>
+              <li>🚗 Rahul Singh paid for most rides & travel.</li>
+              <li>⚡ Only 3 payments are required to completely settle everything!</li>
+              <li>🌴 Weekend trips cost 20% more on average.</li>
+            </ul>
+          </section>
+
+          <!-- SETTLEMENT & DEBT SIMPLIFICATION FLOW SECTION -->
+          <section class="settlement-card-box">
+            <div class="section-header">
+              <h3 class="section-title"><span>⚡</span> Smart Debt Simplification Flow</h3>
+              <button class="btn btn-secondary btn-sm" id="btnTriggerSettleModal">Settle All Now</button>
+            </div>
+
+            <!-- Metrics Bar -->
+            <div class="settlement-metrics">
+              <div class="metric-item">
+                <div class="number" id="metricOriginal">12</div>
+                <div class="label">Original Debts</div>
+              </div>
+              <div class="metric-item">
+                <div class="number" id="metricOptimized">3</div>
+                <div class="label">Optimized Payments</div>
+              </div>
+              <div class="metric-item">
+                <div class="number" id="metricReduction">75%</div>
+                <div class="label">Debt Reduction</div>
+              </div>
+            </div>
+
+            <!-- Payment Flow Cards List -->
+            <div class="payment-flow-list" id="paymentFlowContainer">
+              <!-- Rendered via JS -->
+            </div>
+          </section>
+
+          <!-- RECENT EXPENSES SECTION -->
+          <section>
+            <div class="section-header">
+              <h3 class="section-title"><span>💸</span> Recent Group Expenses</h3>
+              <button class="btn btn-outline btn-sm" data-tab-nav="expenses">View All</button>
+            </div>
+            <div class="expenses-list" id="recentExpensesContainer">
+              <!-- Rendered via JS -->
+            </div>
+          </section>
+
+          <!-- GROUP MEMBERS SECTION -->
+          <section>
+            <div class="section-header">
+              <h3 class="section-title"><span>👥</span> Group Members & Balances</h3>
+              <button class="btn btn-outline btn-sm" id="btnAddMemberBtn">+ Add Member</button>
+            </div>
+            <div class="members-grid" id="membersGridContainer">
+              <!-- Rendered via JS -->
+            </div>
+          </section>
+
+        </div>
+
+      </div>
+
+      <!-- TAB VIEW: ANALYTICS -->
+      <div class="tab-view" id="view-analytics" style="display: none;">
+        <div class="section-header" style="margin-bottom: 24px;">
+          <h2 class="section-title"><span>📊</span> Group Spending Analytics</h2>
+        </div>
+
+        <div class="summary-cards-grid" style="margin-bottom: 24px;">
+          <div class="summary-card">
+            <span class="summary-card-title">Monthly Spending</span>
+            <div class="summary-card-amount" id="analyticsMonthlySpending">₹0</div>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card-title">Top Category</span>
+            <div class="summary-card-amount" id="analyticsTopCategory">—</div>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card-title">Top Contributor</span>
+            <div class="summary-card-amount" id="analyticsTopContributor">—</div>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card-title">Avg Expense</span>
+            <div class="summary-card-amount" id="analyticsAverageExpense">₹0</div>
+          </div>
+        </div>
+
+        <div class="settlement-card-box">
+          <h3 class="section-title" style="margin-bottom: 16px;">Category Breakdown</h3>
+          <div style="height: 300px; position: relative;">
+            <canvas id="analyticsChart"></canvas>
+          </div>
         </div>
       </div>
-    </div>
+
+      <!-- TAB VIEW: EXPENSES -->
+      <div class="tab-view" id="view-expenses" style="display: none;">
+        <div class="section-header" style="margin-bottom: 24px;">
+          <h2 class="section-title"><span>🧾</span> All Expenses</h2>
+          <button class="btn btn-primary btn-open-add-expense">+ Add Expense</button>
+        </div>
+        <div class="expenses-list" id="allExpensesContainer">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- TAB VIEW: GROUPS -->
+      <div class="tab-view" id="view-groups" style="display: none;">
+        <div class="section-header" style="margin-bottom: 24px;">
+          <h2 class="section-title"><span>🏠</span> Your Active Groups</h2>
+          <button class="btn btn-primary" id="btnCreateNewGroup">+ Create New Group</button>
+        </div>
+        <div class="members-grid" id="allGroupsGrid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+    </main>
+
+    <!-- =========================================================
+         RIGHT SUMMARY PANEL
+         ========================================================= -->
+    <aside class="right-panel">
+      <div class="panel-widget">
+        <div class="panel-widget-title">
+          <span>Today's Summary</span>
+          <i data-lucide="pie-chart" style="width:16px;"></i>
+        </div>
+        <div class="mini-pie-chart-container">
+          <canvas id="miniPieChart"></canvas>
+        </div>
+      </div>
+
+      <div class="panel-widget">
+        <div class="panel-widget-title">
+          <span>Quick Balance</span>
+          <i data-lucide="wallet" style="width:16px;"></i>
+        </div>
+        <div style="font-size: 24px; font-weight: 800; color: var(--primary-green);" id="quickNetBalance">
+          +₹1,520
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Net receivable balance across all active groups</div>
+      </div>
+
+      <div class="panel-widget">
+        <div class="panel-widget-title">
+          <span>Recent Activity</span>
+          <i data-lucide="clock" style="width:16px;"></i>
+        </div>
+        <div class="quick-activity-item">
+          <span>🍕</span> <strong>Aman</strong> added Domino's Pizza (₹1,250)
+        </div>
+        <div class="quick-activity-item">
+          <span>🚕</span> <strong>Rahul</strong> added Uber Ride (₹540)
+        </div>
+        <div class="quick-activity-item">
+          <span>☕</span> <strong>Raza</strong> paid Tea & Snacks (₹220)
+        </div>
+      </div>
+
+      <div class="panel-widget">
+        <div class="panel-widget-title">
+          <span>Upcoming Bills</span>
+          <i data-lucide="calendar" style="width:16px;"></i>
+        </div>
+        <div class="quick-activity-item">
+          <span>🏢</span> <strong>Hostel Rent</strong> due on 5th Aug
+        </div>
+        <div class="quick-activity-item">
+          <span>⚡</span> <strong>WiFi Bill</strong> due on 10th Aug
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- =========================================================
+       MOBILE BOTTOM NAVIGATION
+       ========================================================= -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-nav-item active" data-tab="dashboard">
+      <i data-lucide="layout-dashboard"></i>
+      <span>Dashboard</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="groups">
+      <i data-lucide="users"></i>
+      <span>Groups</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="expenses">
+      <i data-lucide="receipt"></i>
+      <span>Expenses</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="analytics">
+      <i data-lucide="pie-chart"></i>
+      <span>Analytics</span>
+    </button>
+    <button class="mobile-nav-item" data-tab="settings">
+      <i data-lucide="user"></i>
+      <span>Profile</span>
+    </button>
   </nav>
 
-  <!-- Main App Container -->
-  <main class="main-container">
+  <!-- Floating Add Expense Button (Mobile) -->
+  <button class="fab-add-button btn-open-add-expense" title="Add Expense">
+    <i data-lucide="plus"></i>
+  </button>
 
-    <!-- FIRST-TIME USER QUICK START BANNER -->
-    <section class="quick-start-banner">
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(124, 58, 237, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">💡</div>
-          <div>
-            <h3 style="font-size: 1.1rem; font-weight: 700;">Welcome to SplitSathi! How to split bills in 3 simple steps:</h3>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.15rem;">
-              <strong>1. Add Members</strong> ➔ <strong>2. Log Expense (Domino's, Ola, Rent)</strong> ➔ <strong>3. Tap "Settle Up" to clear debts!</strong>
-            </p>
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 0.75rem;">
-          <button class="btn btn-primary btn-open-add-expense">+ Add Expense Now</button>
-          <button id="btnHideGuide" class="btn btn-glass btn-sm" style="opacity: 0.7;">Got it &times;</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 4 DASHBOARD STAT CARDS -->
-    <section class="stats-grid">
-      <div class="glass-card">
-        <div class="stat-header">
-          <span class="stat-title">Total Group Expense</span>
-          <div class="stat-icon-wrapper purple">💳</div>
-        </div>
-        <div id="statTotalExpense" class="stat-number">₹18,760</div>
-        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.35rem;">Total spent across all group members</div>
-      </div>
-
-      <div class="glass-card">
-        <div class="stat-header">
-          <span class="stat-title">You Owe</span>
-          <div class="stat-icon-wrapper red">🔻</div>
-        </div>
-        <div id="statYouOwe" class="stat-number" style="color: var(--error);">₹1,240</div>
-        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.35rem;">Amount you need to pay back</div>
-      </div>
-
-      <div class="glass-card">
-        <div class="stat-header">
-          <span class="stat-title">You'll Receive</span>
-          <div class="stat-icon-wrapper green">🔺</div>
-        </div>
-        <div id="statYouReceive" class="stat-number" style="color: var(--emerald);">₹2,980</div>
-        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.35rem;">Amount friends owe you</div>
-      </div>
-
-      <div class="glass-card">
-        <div class="stat-header">
-          <span class="stat-title">Group Members</span>
-          <div class="stat-icon-wrapper blue">👥</div>
-        </div>
-        <div id="statMembersCount" class="stat-number">5</div>
-        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.35rem;">Sharing expenses in this group</div>
-      </div>
-    </section>
-
-    <!-- AI INSIGHTS PANEL -->
-    <section class="ai-insights-panel">
-      <div class="ai-header">
-        <span>✨</span>
-        <h3>Smart AI Insights</h3>
-      </div>
-      <div id="aiInsightsList" class="ai-insights-grid"></div>
-    </section>
-
-    <!-- TAB 1: DASHBOARD OVERVIEW -->
-    <section id="pane-dashboard" class="tab-pane active">
-      <div style="display: grid; grid-template-columns: 1.8fr 1fr; gap: 1.5rem;">
-        <!-- Recent Expense Feed -->
-        <div class="glass-card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-            <div>
-              <h3>🧾 Recent Shared Expenses</h3>
-              <p style="font-size: 0.8rem; color: var(--text-secondary);">Latest transactions logged by your group</p>
-            </div>
-            <button class="btn btn-primary btn-sm btn-open-add-expense">+ Add Expense</button>
-          </div>
-          <div id="dashExpensesFeed" class="timeline-container"></div>
-        </div>
-
-        <!-- Quick Settlement Overview -->
-        <div class="glass-card">
-          <div style="margin-bottom: 1.25rem;">
-            <h3>⚡ Settle Up Dues</h3>
-            <p style="font-size: 0.8rem; color: var(--text-secondary);">Optimal transfers to clear all balances</p>
-          </div>
-          <div id="dashSettlementsFeed" style="display: flex; flex-direction: column; gap: 1rem;"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 2: SETTLEMENTS & DEBT SIMPLIFICATION -->
-    <section id="pane-settlements" class="tab-pane">
-      <div class="settlement-hero-banner">
-        <div>
-          <h2>⚡ Smart Debt Simplification</h2>
-          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.25rem;">
-            Our algorithm reduces complex multi-person debts into the absolute minimum number of payments!
-          </p>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
-          <div class="hero-stats-box">
-            <div class="hero-stat-item">
-              <div id="statOriginalTx" class="num">12</div>
-              <div class="lbl">Original</div>
-            </div>
-            <div style="color: var(--text-secondary); font-size: 1.2rem;">➔</div>
-            <div class="hero-stat-item">
-              <div id="statOptimizedTx" class="num" style="color: var(--emerald);">3</div>
-              <div class="lbl">Optimized</div>
-            </div>
-            <div class="hero-stat-item">
-              <div id="statSavingsPct" class="num" style="color: #A78BFA;">75%</div>
-              <div class="lbl">Savings</div>
-            </div>
-          </div>
-
-          <div style="display: flex; background: var(--bg-card-solid); padding: 0.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-            <button id="toggleSimplifiedView" class="btn btn-sm btn-primary">⚡ Optimized View</button>
-            <button id="toggleRawView" class="btn btn-sm btn-glass">⛓️ Unsimplified Raw</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="settlementCardsGrid" class="settlement-cards-grid"></div>
-    </section>
-
-    <!-- TAB 3: EXPENSES -->
-    <section id="pane-expenses" class="tab-pane">
-      <div class="glass-card" style="margin-bottom: 1.5rem;">
-        <div class="toolbar">
-          <input type="text" id="searchExpense" class="input-control" placeholder="🔍 Search expenses (e.g. Domino's, Ola)..." style="min-width: 280px; flex: 1;">
-          
-          <select id="filterCategory" class="select-control">
-            <option value="all">All Categories</option>
-            <option value="food">🍕 Food & Dining</option>
-            <option value="travel">🚕 Travel & Cabs</option>
-            <option value="fuel">⛽ Fuel & Petrol</option>
-            <option value="groceries">🛒 Groceries & DMart</option>
-            <option value="entertainment">🎬 Movies & Events</option>
-            <option value="housing">🏨 Hotel & Rent</option>
-            <option value="utilities">⚡ Bills & Utilities</option>
-          </select>
-
-          <select id="filterMember" class="select-control">
-            <option value="all">All Payers</option>
-          </select>
-
-          <button class="btn btn-primary btn-open-add-expense">+ Log New Expense</button>
-        </div>
-      </div>
-
-      <div id="expensesTimelineList" class="timeline-container"></div>
-    </section>
-
-    <!-- TAB 4: MEMBERS -->
-    <section id="pane-members" class="tab-pane">
-      <div class="glass-card" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h3>👥 Group Members</h3>
-          <p style="font-size: 0.8rem; color: var(--text-secondary);">Track total paid, fair share, and net balances for everyone.</p>
-        </div>
-        <button class="btn btn-primary btn-open-add-member">+ Add Member</button>
-      </div>
-
-      <div id="membersGridCards" class="member-grid-cards"></div>
-    </section>
-
-    <!-- TAB 5: ANALYTICS -->
-    <section id="pane-analytics" class="tab-pane">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-        <div class="glass-card">
-          <h3 style="margin-bottom: 1.25rem;">📊 Monthly Spending by Category</h3>
-          <div id="analyticsCategoryList"></div>
-        </div>
-
-        <div class="glass-card">
-          <h3 style="margin-bottom: 1.25rem;">⚖️ Fair Share Spending per Member</h3>
-          <div id="analyticsMemberList"></div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- FLOATING ACTION BUTTON (FAB) -->
-  <button id="fabAddExpense" class="fab-btn btn-open-add-expense" title="Add New Expense">+</button>
-
-  <!-- MODALS -->
-
-  <!-- Modal 1: Add / Edit Expense -->
-  <div id="modalExpense" class="modal-overlay">
+  <!-- =========================================================
+       ADD EXPENSE MODAL
+       ========================================================= -->
+  <div class="modal-overlay" id="addExpenseModal">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="modalExpenseTitle">Log New Shared Expense</h3>
-        <button class="btn-icon-btn btn-close-modal">&times;</button>
+        <h3>Add New Expense</h3>
+        <button class="close-modal-btn" id="closeAddExpenseModal">&times;</button>
       </div>
-      <form id="formExpense">
-        <input type="hidden" id="expenseEditId" value="">
-        
-        <div class="modal-body">
-          <div style="margin-bottom: 1.25rem;">
-            <label class="stat-title">Expense Title / Description</label>
-            <input type="text" id="expenseTitleInput" class="input-control" placeholder="e.g. Domino's Pizza Feast" style="width: 100%; margin-top: 0.35rem;" required>
-          </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-            <div>
-              <label class="stat-title">Total Amount (₹)</label>
-              <input type="number" id="expenseAmountInput" class="input-control" placeholder="1250" step="1" min="1" style="width: 100%; margin-top: 0.35rem;" required>
-            </div>
-            <div>
-              <label class="stat-title">Category</label>
-              <select id="expenseCategorySelect" class="select-control" style="width: 100%; margin-top: 0.35rem;">
-                <option value="food">🍕 Food & Dining</option>
-                <option value="travel">🚕 Travel & Cabs</option>
-                <option value="fuel">⛽ Fuel & Petrol</option>
-                <option value="groceries">🛒 Groceries & DMart</option>
-                <option value="entertainment">🎬 Movies & Events</option>
-                <option value="housing">🏨 Hotel & Rent</option>
-                <option value="utilities">⚡ Bills & Utilities</option>
-                <option value="misc">📦 Miscellaneous</option>
-              </select>
-            </div>
-          </div>
+      <form id="addExpenseForm">
+        <div class="form-group">
+          <label for="expenseTitle">Expense Description</label>
+          <input type="text" id="expenseTitle" class="form-control" placeholder="e.g. Domino's Pizza, Swiggy, Uber" required>
+        </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-            <div>
-              <label class="stat-title">Who Paid First?</label>
-              <select id="expensePaidBySelect" class="select-control" style="width: 100%; margin-top: 0.35rem;" required></select>
-            </div>
-            <div>
-              <label class="stat-title">Date</label>
-              <input type="date" id="expenseDateInput" class="input-control" style="width: 100%; margin-top: 0.35rem;" required>
-            </div>
-          </div>
+        <div class="form-group">
+          <label for="expenseAmount">Amount (₹)</label>
+          <input type="number" id="expenseAmount" class="form-control" placeholder="0.00" min="1" step="any" required>
+        </div>
 
-          <!-- Custom Split Selector -->
-          <div style="margin-bottom: 1.25rem;">
-            <label class="stat-title" style="margin-bottom: 0.5rem; display: block;">How to Split?</label>
-            <div style="display: flex; background: var(--bg-app); padding: 0.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 0.85rem;">
-              <button type="button" class="btn btn-sm split-tab-btn active" data-split="equal" style="flex: 1;">⚖️ Equally</button>
-              <button type="button" class="btn btn-sm split-tab-btn" data-split="exact" style="flex: 1;">💵 Exact ₹</button>
-              <button type="button" class="btn btn-sm split-tab-btn" data-split="percentage" style="flex: 1;">📊 % Split</button>
-              <button type="button" class="btn btn-sm split-tab-btn" data-split="shares" style="flex: 1;">🔢 Shares</button>
-            </div>
+        <div class="form-group">
+          <label for="expensePaidBy">Who Paid?</label>
+          <select id="expensePaidBy" class="form-control" required>
+            <!-- Populated via JS -->
+          </select>
+        </div>
 
-            <div id="splitMembersList" style="display: flex; flex-direction: column; gap: 0.6rem; max-height: 200px; overflow-y: auto; padding-right: 0.25rem;"></div>
-
-            <div id="splitValidationAlert" class="badge badge-emerald" style="display: none; margin-top: 0.75rem; width: 100%; justify-content: center; padding: 0.5rem;"></div>
-          </div>
-
-          <!-- Notes / Attachment -->
-          <div>
-            <label class="stat-title">Notes / Payment Ref (Optional)</label>
-            <input type="text" id="expenseNotesInput" class="input-control" placeholder="e.g. Paid via PhonePe UPI" style="width: 100%; margin-top: 0.35rem;">
+        <div class="form-group">
+          <label>Category</label>
+          <div class="category-grid-select" id="categoryPicker">
+            <div class="category-chip selected" data-cat="food" data-emoji="🍕">🍕 Food</div>
+            <div class="category-chip" data-cat="travel" data-emoji="🚕">🚕 Travel</div>
+            <div class="category-chip" data-cat="fuel" data-emoji="⛽">⛽ Fuel</div>
+            <div class="category-chip" data-cat="shopping" data-emoji="🛒">🛒 Shopping</div>
+            <div class="category-chip" data-cat="entertainment" data-emoji="🎬">🎬 PVR</div>
+            <div class="category-chip" data-cat="groceries" data-emoji="🥦">🥦 DMart</div>
+            <div class="category-chip" data-cat="utilities" data-emoji="⚡">⚡ Utilities</div>
+            <div class="category-chip" data-cat="rent" data-emoji="🏠">🏠 Rent</div>
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-glass btn-close-modal">Cancel</button>
+        <div class="form-group">
+          <label>Split Type</label>
+          <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <button type="button" class="btn btn-secondary btn-sm active" id="btnSplitEqual">Equal</button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnSplitUnequal">Custom Share</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Receipt Upload (Optional)</label>
+          <div style="border: 2px dashed var(--border-color); padding: 16px; border-radius: var(--radius-md); text-align: center; color: var(--text-muted); cursor: pointer;" id="receiptDropzone">
+            📁 Click or drop receipt image here
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+          <button type="button" class="btn btn-outline" id="cancelAddExpenseModal">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Expense</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal 2: Settle Up -->
-  <div id="modalSettle" class="modal-overlay">
-    <div class="modal-card" style="max-width: 440px;">
+  <!-- =========================================================
+       SETTLE UP MODAL
+       ========================================================= -->
+  <div class="modal-overlay" id="settleModal">
+    <div class="modal-card" style="text-align: center;">
       <div class="modal-header">
-        <h3>🤝 Record Settlement Payment</h3>
-        <button class="btn-icon-btn btn-close-modal">&times;</button>
+        <h3>⚡ Quick Settle Up</h3>
+        <button class="close-modal-btn" id="closeSettleModal">&times;</button>
       </div>
-      <form id="formSettle">
-        <div class="modal-body">
-          <div style="margin-bottom: 1rem;">
-            <label class="stat-title">Payer (Who is paying)</label>
-            <select id="settleFromSelect" class="select-control" style="width: 100%; margin-top: 0.35rem;" required></select>
-          </div>
 
-          <div style="margin-bottom: 1rem;">
-            <label class="stat-title">Recipient (Who is receiving)</label>
-            <select id="settleToSelect" class="select-control" style="width: 100%; margin-top: 0.35rem;" required></select>
-          </div>
-
-          <div style="margin-bottom: 1rem;">
-            <label class="stat-title">Settlement Amount (₹)</label>
-            <input type="number" id="settleAmountInput" class="input-control" placeholder="0.00" step="1" min="1" style="width: 100%; margin-top: 0.35rem;" required>
-          </div>
-
-          <div>
-            <label class="stat-title">Payment Method / Reference</label>
-            <input type="text" id="settleNotesInput" class="input-control" placeholder="e.g. GPay / PhonePe / Paytm UPI" style="width: 100%; margin-top: 0.35rem;">
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-glass btn-close-modal">Cancel</button>
-          <button type="submit" class="btn btn-emerald">Confirm Settlement Payment ⚡</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal 3: Add Member -->
-  <div id="modalMember" class="modal-overlay">
-    <div class="modal-card" style="max-width: 400px;">
-      <div class="modal-header">
-        <h3>Add Group Member</h3>
-        <button class="btn-icon-btn btn-close-modal">&times;</button>
+      <div style="margin: 20px 0;" id="settleModalBody">
+        <!-- Rendered via JS -->
       </div>
-      <form id="formMember">
-        <div class="modal-body">
-          <label class="stat-title">Member Full Name</label>
-          <input type="text" id="memberNameInput" class="input-control" placeholder="e.g. Vikram Malhotra" style="width: 100%; margin-top: 0.35rem;" required>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-glass btn-close-modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Add Member</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
-  <!-- Modal 4: Demo Presets -->
-  <div id="modalDemo" class="modal-overlay">
-    <div class="modal-card" style="max-width: 480px;">
-      <div class="modal-header">
-        <h3>✨ Load Preset Scenarios</h3>
-        <button class="btn-icon-btn btn-close-modal">&times;</button>
-      </div>
-      <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem;">
-        <button class="btn btn-glass btn-load-preset" data-preset="goa" style="text-align: left; justify-content: flex-start; padding: 1.25rem;">
-          <div>
-            <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-main);">🌴 Weekend Goa Trip</div>
-            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">
-              5 members (Rza Mohammed, Aman, Priya, Rahul, Neha), Domino's, Ola, DMart, Petrol & Hotel.
-            </div>
-          </div>
-        </button>
-
-        <button class="btn btn-glass btn-load-preset" data-preset="flat" style="text-align: left; justify-content: flex-start; padding: 1.25rem;">
-          <div>
-            <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-main);">🏠 Flat 302 Roommates</div>
-            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">
-              3 members (Rza Mohammed, Aman, Rahul), Rent, Electricity & Broadband.
-            </div>
-          </div>
-        </button>
+      <div style="display: flex; justify-content: center; gap: 12px;">
+        <button type="button" class="btn btn-outline" id="cancelSettleModal">Close</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmSettle">Record Payment & Settle</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 5: Export / Import -->
-  <div id="modalExport" class="modal-overlay">
-    <div class="modal-card" style="max-width: 500px;">
-      <div class="modal-header">
-        <h3>💾 Backup / Restore State</h3>
-        <button class="btn-icon-btn btn-close-modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <label class="stat-title">JSON Data State</label>
-        <textarea id="jsonStorageArea" class="input-control" rows="8" style="font-family: monospace; font-size: 0.8rem; width: 100%; margin-top: 0.35rem;"></textarea>
-      </div>
-      <div class="modal-footer">
-        <button id="btnCopyJson" class="btn btn-glass">📋 Copy JSON</button>
-        <button id="btnImportJson" class="btn btn-primary">📥 Import State</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- App JS Modules -->
   <script type="module" src="js/app.js"></script>
+
 </body>
 </html>

@@ -48,15 +48,19 @@ Bill Splitting & Debt Simplification App/
    cd SplitSathi
    ```
 
-2. **Run Locally**:
-   Open `index.html` directly in any modern browser, or run a local dev server:
+2. **Install dependencies and run locally**:
    ```bash
-   npx serve .
-   # or
-   python -m http.server 8080
+   npm install
+   npm run dev
    ```
 
-3. Open `http://localhost:8080` in your web browser.
+3. **Create a production bundle**:
+   ```bash
+   npm run build
+   npm run preview
+   ```
+
+   Open the local URL printed by Vite in your web browser.
 
 ---
 
