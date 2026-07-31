@@ -448,6 +448,13 @@
             <button type="button" class="btn btn-secondary btn-sm active" id="btnSplitEqual">Equal</button>
             <button type="button" class="btn btn-outline btn-sm" id="btnSplitUnequal">Custom Share</button>
           </div>
+          <div class="custom-splits-box" id="customSplitsContainer" style="display: none; background: var(--bg-main); border: 1px solid var(--border-color); padding: 14px; border-radius: var(--radius-md);">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px;">Enter Custom Amount for Each Member (₹)</label>
+            <div id="customSplitsList" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Populated via JS -->
+            </div>
+            <div id="customSplitsSummaryMsg" style="font-size: 12px; font-weight: 700; margin-top: 8px; color: var(--primary-green);"></div>
+          </div>
         </div>
 
         <div class="form-group">

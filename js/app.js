@@ -153,6 +153,104 @@ function bindCategoryPicker() {
 /* =========================================================
    ADD EXPENSE MODAL BINDING
    ========================================================= */
+let currentSplitType = 'equal';
+
+function renderCustomSplitsFields() {
+  const container = document.getElementById('customSplitsList');
+  const group = stateManager.getActiveGroup();
+  if (!container || !group) return;
+
+  const totalAmount = Number(document.getElementById('expenseAmount').value) || 0;
+  const members = group.members || [];
+  const defaultShare = members.length > 0 ? Math.round((totalAmount / members.length) * 100) / 100 : 0;
+
+  container.innerHTML = members.map(m => `
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+      <span style="font-size: 13px; font-weight: 600; color: var(--text-primary); flex: 1;">${m.name}</span>
+      <input type="number" class="form-control custom-member-share-input" data-member-id="${m.id}" value="${defaultShare}" min="0" step="any" style="width: 110px; padding: 6px 10px; font-size: 13px;">
+    </div>
+  `).join('');
+
+  updateCustomSplitsSummary();
+
+  container.querySelectorAll('.custom-member-share-input').forEach(input => {
+    input.addEventListener('input', updateCustomSplitsSummary);
+  });
+}
+
+function updateCustomSplitsSummary() {
+  const totalAmount = Number(document.getElementById('expenseAmount').value) || 0;
+  const inputs = document.querySelectorAll('.custom-member-share-input');
+  let currentSum = 0;
+  inputs.forEach(inp => {
+    currentSum += Number(inp.value) || 0;
+  });
+
+  const msgEl = document.getElementById('customSplitsSummaryMsg');
+  if (msgEl) {
+    const diff = Math.round((totalAmount - currentSum) * 100) / 100;
+    if (Math.abs(diff) < 0.01) {
+      msgEl.textContent = `✓ Total matches expense amount (${formatMoney(totalAmount)})`;
+      msgEl.style.color = 'var(--primary-green)';
+    } else if (diff > 0) {
+      msgEl.textContent = `⚠️ Remaining to allocate: ${formatMoney(diff)}`;
+      msgEl.style.color = 'var(--warning-yellow)';
+    } else {
+      msgEl.textContent = `⚠️ Exceeds total by ${formatMoney(Math.abs(diff))}`;
+      msgEl.style.color = 'var(--error)';
+    }
+  }
+}
+
+// Global Document-level Event Delegation for Split Type Toggle
+document.addEventListener('click', (e) => {
+  const btnCustom = e.target.closest('#btnSplitUnequal');
+  const btnEqual = e.target.closest('#btnSplitEqual');
+
+  if (btnCustom) {
+    e.preventDefault();
+    e.stopPropagation();
+    currentSplitType = 'custom';
+    const equalEl = document.getElementById('btnSplitEqual');
+    const customEl = document.getElementById('btnSplitUnequal');
+    const customBox = document.getElementById('customSplitsContainer');
+
+    if (customEl) {
+      customEl.classList.add('active', 'btn-secondary');
+      customEl.classList.remove('btn-outline');
+    }
+    if (equalEl) {
+      equalEl.classList.remove('active', 'btn-secondary');
+      equalEl.classList.add('btn-outline');
+    }
+    if (customBox) {
+      customBox.style.display = 'block';
+    }
+    renderCustomSplitsFields();
+  }
+
+  if (btnEqual) {
+    e.preventDefault();
+    e.stopPropagation();
+    currentSplitType = 'equal';
+    const equalEl = document.getElementById('btnSplitEqual');
+    const customEl = document.getElementById('btnSplitUnequal');
+    const customBox = document.getElementById('customSplitsContainer');
+
+    if (equalEl) {
+      equalEl.classList.add('active', 'btn-secondary');
+      equalEl.classList.remove('btn-outline');
+    }
+    if (customEl) {
+      customEl.classList.remove('active', 'btn-secondary');
+      customEl.classList.add('btn-outline');
+    }
+    if (customBox) {
+      customBox.style.display = 'none';
+    }
+  }
+});
+
 function bindExpenseModalEvents() {
   const modal = document.getElementById('addExpenseModal');
   const openBtns = document.querySelectorAll('.btn-open-add-expense');
@@ -160,7 +258,24 @@ function bindExpenseModalEvents() {
   const cancelBtn = document.getElementById('cancelAddExpenseModal');
   const form = document.getElementById('addExpenseForm');
 
+  const btnEqual = document.getElementById('btnSplitEqual');
+  const btnCustom = document.getElementById('btnSplitUnequal');
+  const customBox = document.getElementById('customSplitsContainer');
+  const expenseAmountInput = document.getElementById('expenseAmount');
+
+  if (expenseAmountInput) {
+    expenseAmountInput.addEventListener('input', () => {
+      if (currentSplitType === 'custom') {
+        renderCustomSplitsFields();
+      }
+    });
+  }
+
   const openModal = () => {
+    currentSplitType = 'equal';
+    if (btnEqual) btnEqual.className = 'btn btn-secondary btn-sm active';
+    if (btnCustom) btnCustom.className = 'btn btn-outline btn-sm';
+    if (customBox) customBox.style.display = 'none';
     if (modal) modal.classList.add('active');
   };
 
@@ -188,7 +303,21 @@ function bindExpenseModalEvents() {
 
       const group = stateManager.getActiveGroup();
       const members = group.members || [];
-      const splits = splitEqually(amount, members.map(({ id }) => id));
+      let splits = [];
+
+      if (currentSplitType === 'custom') {
+        const inputs = document.querySelectorAll('.custom-member-share-input');
+        splits = Array.from(inputs).map(inp => ({
+          memberId: inp.getAttribute('data-member-id'),
+          amount: Number(inp.value) || 0
+        }));
+      } else {
+        const share = Math.round((amount / members.length) * 100) / 100;
+        splits = members.map(m => ({
+          memberId: m.id,
+          amount: share
+        }));
+      }
 
       stateManager.addExpense({
         title,
@@ -196,7 +325,7 @@ function bindExpenseModalEvents() {
         paidBy,
         category: selectedCategory,
         emoji: selectedEmoji,
-        splitType: 'equal',
+        splitType: currentSplitType,
         splits
       });
 
