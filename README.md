@@ -1,4 +1,4 @@
-# ⚡ SplitSathi — Split bills, not friendships.
+# ⚡ SplitSathi — Split bills, not friendship.
 
 > An award-winning, CRED & GPay inspired Indian fintech web application for group bill splitting and automated debt simplification using the **Greedy Minimum Cash Flow** algorithm.
 
